@@ -1,0 +1,219 @@
+// Copyright © 2020 ThreatConnect, Inc. All rights reserved.
+// Contributor: Cezanne Vahid
+// Software License
+// Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+// Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+// Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+// Neither the name of ThreatConnect, Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+{
+    "iterative_path": null,
+    "imports": ["datetime"],
+    "default_attribute_source": "VirusTotal",
+    "data_mappings": [
+        {
+            "sources": ["context_attributes.rule_name", "attributes.md5"],
+            "target": "incident",
+            "function": "lambda x, z: '{} {} {}'.format(modules.datetime.datetime.now().strftime('%Y%m%d'), z[:5].upper(), x)",
+            "id": "vt_incident"
+        },
+        {
+            "sources": ["attributes.md5"],
+            "target": "incident",
+            "function": "lambda x: '{} Analysis'.format(x)",
+            "id": "analysis_incident"
+        },
+        {
+            "sources": ["attributes.md5", "attributes.sha1", "attributes.sha256"],
+            "target": "file",
+            "id": "vt_file",
+            "function": "lambda x,y,z: '{} : {} : {}'.format(x,y,z)"
+        },
+
+        {
+            "sources": ["attributes.last_analysis_results"],
+            "target": "analysis_incident:tag",
+            "function": "lambda x: list(map(lambda z: '{}: {}'.format(x[z]['engine_name'], x[z]['result'])[:128], x))"
+        },
+
+        {
+            "sources": ["attributes.tags"],
+            "target": "vt_incident:tag"
+        },
+        {
+            "sources": ["context_attributes.notification_date"],
+            "target": "vt_incident:Hunting Notification Date",
+            "function": "lambda x: modules.datetime.datetime.fromtimestamp(x).strftime('%Y-%m-%dT%H:%M:%SZ')"
+        },
+        {
+            "sources": ["context_attributes.notification_id"],
+            "target": "vt_incident:Hunting Notification ID"
+        },
+        {
+            "sources": ["context_attributes.ruleset_name"],
+            "target": "vt_incident:Ruleset Name"
+        },
+        {
+            "sources": ["context_attributes.rule_name"],
+            "target": "vt_incident:Rule Name"
+        },
+        {
+            "sources": ["context_attributes.ruleset_id"],
+            "target": "vt_incident:Ruleset ID"
+        },
+
+        {
+            "sources": ["attributes.exiftool"],
+            "target": "vt_file:Exif Tool Metadata",
+            "function": "lambda x: '\\n'.join(list(map(lambda z: '####{}: {}'.format(z[0], z[1]), x.items())))"
+        },
+        {
+            "sources": ["attributes.exiftool.CompanyName"],
+            "target": "vt_file:PE Company Name"
+        },
+        {
+            "sources": ["attributes.exiftool.EntryPoint"],
+            "target": "vt_file:Entry Point",
+            "function": "lambda x: '{}{}'.format('0'*(8 - len(x[2:])), x[2:])"
+        },
+        {
+            "sources": ["attributes.exiftool.FileDescription"],
+            "target": "vt_file:PE Description"
+        },
+        {
+            "sources": ["attributes.creation_date"],
+            "target": "vt_file:Creation Timestamp",
+            "function": "lambda x: modules.datetime.datetime.fromtimestamp(x).strftime('%Y-%m-%dT%H:%M:%SZ')"
+        },
+        {
+            "sources": ["attributes.first_submission_date"],
+            "target": "vt_file:First Seen",
+            "function": "lambda x: modules.datetime.datetime.fromtimestamp(x).strftime('%Y-%m-%dT%H:%M:%SZ')"
+        },
+        {
+            "sources": ["attributes.last_submission_date"],
+            "target": "vt_file:Last Seen",
+            "function": "lambda x: modules.datetime.datetime.fromtimestamp(x).strftime('%Y-%m-%dT%H:%M:%SZ')"
+        },
+        {
+            "sources": ["attributes.tags"],
+            "target": "vt_file:tag",
+            "function": "lambda x: ['VT Tag: {}'.format(y) for y in x]"
+        },
+        {
+            "sources": ["attributes.magic"],
+            "target": "vt_file:Magic"
+        },
+        {
+            "sources": ["attributes.size"],
+            "target": "vt_file:size"
+        },
+        {
+            "sources": ["attributes.names"],
+            "target": "vt_file:fileOccurrence"
+        },
+        {
+            "sources": ["attributes.names"],
+            "target": "vt_file:File Name"
+        },
+        {
+            "sources": ["attributes.pe_info.imphash"],
+            "target": "vt_file:Import Hash"
+        },
+        {
+            "sources": ["attributes.type_description"],
+            "target": "vt_file:File Type"
+        },
+        {
+            "sources": ["attributes.signature_info.copyright"],
+            "target": "vt_file:PE File Detail Copyright"
+        },
+        {
+            "sources": ["attributes.signature_info.description"],
+            "target": "vt_file:PE File Detail Description"
+        },
+        {
+            "sources": ["attributes.signature_info.\"file version\""],
+            "target": "vt_file:PE File Detail Version"
+        },
+        {
+            "sources": ["attributes.signature_info.\"original name\""],
+            "target": "vt_file:PE File Detail Original Name"
+        },
+        {
+            "sources": ["attributes.signature_info.product"],
+            "target": "vt_file:PE File Detail Product"
+        },
+        {
+            "sources": ["attributes.ssdeep"],
+            "target": "vt_file:ssdeep Hash"
+        },
+        {
+            "sources": ["attributes.times_submitted"],
+            "target": "vt_file:Times Submitted"
+        },
+        {
+            "sources": ["attributes.unique_sources"],
+            "target": "vt_file:Unique Sources"
+        },
+        {
+            "sources": ["context_attributes.match_in_subfile"],
+            "target": "vt_file:Match in Subfile"
+        },
+        {
+            "sources": ["context_attributes.rule_name"],
+            "target": "vt_file:Rule Name"
+        },
+        {
+            "sources": ["attributes.last_analysis_stats"],
+            "target": "vt_file:Last Analysis Stats",
+            "function": "lambda x: '\\n'.join(list(map(lambda z: '####{}: {}'.format(z[0], z[1]), x.items())))"
+        },
+        {
+            "sources": ["attributes.last_analysis_results"],
+            "target": "vt_file:AV Scanner Results",
+            "function": "lambda x,y='|Engine Name|Category|Result|\\n|---|---|---|\\n': y + '\\n'.join(list(map(lambda z: '|{}|{}|{}|'.format(x[z]['engine_name'],x[z]['category'],x[z]['result']), x)))"
+        },
+        {
+            "sources": ["attributes.last_analysis_stats"],
+            "target": "vt_file:Detection Ratio",
+            "function": "lambda x: '{}/{}'.format(x['malicious'], sum(x.values()))"
+        },
+        {
+            "sources": ["context_attributes.notification_snippet"],
+            "target": "vt_file:Matching File Data",
+            "function": "lambda x: x.replace('*begin_highlight*', '_').replace('*end_highlight*', '_')"
+        },
+        {
+            "sources": ["attributes.pe_info.debug[0].timedatestamp"],
+            "target": "vt_file:PE Timestamp",
+            "function": "lambda x: modules.datetime.datetime.strptime(x, '%a %b %d %H:%M:%S %Y').strftime('%Y-%m-%dT%H:%M:%SZ')"
+        },
+        {
+            "sources": ["attributes.pe_info.resource_details"],
+            "target": "vt_file:PE Resources",
+            "function": "lambda x: ['####filetype: {}\\n####lang: {}\\n####type: {}\\n####sha256: {}'.format(y['filetype'],y['lang'],y['type'],y['sha256']) for y in x]"
+        },
+        {
+            "sources": ["attributes.pe_info.sections"],
+            "target": "vt_file:PE Sections",
+            "function": "lambda x: ['####name: {}\\n####raw_size: {}\\n####virtual_address: {}\\n####virtual_size: {}\\n####md5: {}'.format(y['name'],y['raw_size'],y['virtual_address'],y['virtual_size'],y['md5']) for y in x]"
+        }
+    ],
+    "associations": [
+        {
+            "source": "vt_incident",
+            "target": "vt_file"
+        },
+        {
+            "source": "vt_incident",
+            "target": "analysis_incident"
+        },
+        {
+            "source": "analysis_incident",
+            "target": "vt_file"
+        }
+    ]
+}
